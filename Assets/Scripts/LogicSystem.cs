@@ -12,32 +12,31 @@ public class LogicSystem : MonoBehaviour {
 
 	public Light LightSpot;
 
-	public const int touchScreenWidth = 640;
-	public const int touchScreenHeight = 480;
+	public static int touchScreenWidth = 1920;
+	public static int touchScreenHeight = 1080;
 
 	public Vector3 SceneInScreenBase;
 	public Vector3 SceneInScreenEnd;
 	public float SceneInScreenWidth;
 	public float SceneInScreenHeight;
 
-	const float sceneWidth = 20f;
-	const float sceneHeight = 20f;
+	const float sceneWidth = 30f;
+	const float sceneHeight = 22f;
 	const float iconHeight = 1f;
 	const float userHeight = 0.5f;
-	const float iconInitHeight = 10f;
+	const float iconInitHeight = 0.5f; // (scale / 2)
 
 	const int Depth_Width = 512;
 	const int Depth_Height = 424;
 
-	const float max_x = sceneWidth / 2f;
-	const float min_x = -sceneWidth / 2f;
-	const float max_z = sceneHeight / 2f;
-	const float min_z = -sceneHeight / 2f;
-
 	const float SpotLightheight = 10;
 
+	public bool UseDebug{ get; set;}
 
 	public Vector3 View_MapCenter;
+
+	float lastSendGlassTime = 0;
+	float secondGlassSendPeriod = 0.4f;
 
 
 	//To run Method in Unity main Thread
@@ -59,6 +58,8 @@ public class LogicSystem : MonoBehaviour {
 			Debug.LogWarning ("Not Set iconBase !!");
 
 		ServerPosition.recievePositionEvent += OnRecieveUserPosition;
+		ServerPosition.recievePositionEvent += SendPositionToGlass;
+		DisplayScript.current.displayChangeEvent += OnDisplayChange;
 	}
 
 	// Update is called once per frame
@@ -77,11 +78,6 @@ public class LogicSystem : MonoBehaviour {
 	}
 
 	public void CreateIcon(int x, int y){
-		StartCoroutine (GroundShower (x, y));
-	}
-
-	IEnumerator GroundShower(int x,int y){
-		yield return new WaitForSeconds (0.1f);
 		Instantiate (iconBase, new Vector3 (TouchToSceneX (x), iconInitHeight, TouchToSceneZ (y)), Quaternion.identity);
 	}
 
@@ -118,6 +114,14 @@ public class LogicSystem : MonoBehaviour {
 		center_z /= usersSet.Count;
 
 		return new Vector3 (center_x, center_y, center_z);
+	}
+
+	public void SetTouchScreenWidth(string val){
+		int.TryParse (val, out touchScreenWidth);
+	}
+
+	public void SetTouchScreenHeight(string val){
+		int.TryParse (val, out touchScreenHeight);
 	}
 
 	void OnRecieveUserPosition(ArgsPosition[] args){
@@ -194,11 +198,39 @@ public class LogicSystem : MonoBehaviour {
 		};
 	}
 
+	void SendPositionToGlass(ArgsPosition[] args){
+		functionCallback += delegate {
+			if ((Time.time - lastSendGlassTime) < secondGlassSendPeriod)
+				return;
+			lastSendGlassTime = Time.time;
+
+			string message = "pt";
+			message += "," + args.Length;
+			for (int i = 0; i < args.Length; i++) {
+				message += "," + args [i].x + "," + args [i].y + "," + args [i].z;
+			}
+			ServerGlass.current.SocketSend (message);
+		};
+	}
+
 	void SmoothMove(GameObject obj,Vector3 vect){
 		if (obj == null)
 			return;
 		obj.transform.position = Vector3.Lerp(obj.transform.position, vect, 0.25f);
 		if(obj.GetComponent<Rigidbody> () != null)
 			obj.GetComponent<Rigidbody> ().velocity = Vector3.zero;
+	}
+
+	void OnDisplayChange(int touchCameraId){
+		//Debug.Log (touchCameraId);
+	}
+
+	public void SendResolutionToGlass(){
+		string message = "rs," + touchScreenWidth + "," + touchScreenHeight;
+		ServerGlass.current.SocketSend (message);
+	}
+
+	public void QuitGame(){
+		Application.Quit ();
 	}
 }

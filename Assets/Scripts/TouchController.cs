@@ -1,11 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class TouchController : MonoBehaviour {
 
 	public Camera touchCamera;
 	public GameObject particleTouch;
+	public Text textTouchCount;
 
 	const float touchToWorldDepth = 10;
 
@@ -20,7 +22,7 @@ public class TouchController : MonoBehaviour {
 			_y = Random.Range (0, LogicSystem.touchScreenHeight);
 			emuMessage += "," + _x + "," + _y;
 
-			LogicSystem.current.CreateIcon (_x,_y);
+			//LogicSystem.current.CreateIcon (_x,_y);
 			CreateParticleTouch (_x, _y);
 		}
 		if(ServerGlass.current != null)
@@ -40,12 +42,20 @@ public class TouchController : MonoBehaviour {
 		}
 
 		if (Input.GetMouseButtonDown (0)) {
-			Debug.Log ("Mouse Pos:" + Input.mousePosition);
-			CreateParticleTouch (Input.mousePosition.x, Input.mousePosition.y);
+			if (LogicSystem.current.UseDebug) {
+				int _x = Mathf.FloorToInt (Input.mousePosition.x);
+				int _y = Mathf.FloorToInt (Input.mousePosition.y);
+				//LogicSystem.current.CreateIcon (_x,_y);
+				CreateParticleTouch (_x, _y);
+				string message = "1," + _x + "," + _y;
+				if (ServerGlass.current != null)
+					ServerGlass.current.SocketSend (message);
+			}
 		}
 
 		if (Input.touchSupported) {
 			Touch[] myTouches = Input.touches;
+			textTouchCount.text = "Touch Count : " + Input.touchCount;
 			string message = "";
 			int touchNum = 0;
 			for (int i = 0; i < Input.touchCount; i++) {
@@ -54,13 +64,15 @@ public class TouchController : MonoBehaviour {
 					int _x = Mathf.FloorToInt (myTouches [i].position.x);
 					int _y = Mathf.FloorToInt (myTouches [i].position.y);
 					message += "," + _x + "," + _y;
-					LogicSystem.current.CreateIcon (_x, _y);
+					//LogicSystem.current.CreateIcon (_x,_y);
 					CreateParticleTouch (_x, _y);
 				}
 			}
-			message = "" + touchNum + "," + message;
-			if (ServerGlass.current != null)
-				ServerGlass.current.SocketSend (message);
+			if (touchNum > 0) {
+				message = "" + touchNum + message;
+				if (ServerGlass.current != null)
+					ServerGlass.current.SocketSend (message);
+			}
 		}
 	}
 

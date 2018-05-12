@@ -20,7 +20,6 @@ public class UserCollision : MonoBehaviour {
 				temp.textureSheetAnimation.SetSprite (0, RandomSprites [Random.Range (0, RandomSprites.Length)]);
 			Destroy (temp.gameObject,8);
 			Destroy (c.gameObject);
-
 		}
 	}
 	
@@ -42,4 +41,5 @@ public class UserCollision : MonoBehaviour {
 			c.gameObject.GetComponent<Rigidbody>().AddForce(dir*force);
 		}
 	}
+
 }

@@ -9,6 +9,8 @@ using System.Threading;
 
 public class ServerPosition : MonoBehaviour {
 
+	//負責接收 Kinect 位置訊號
+
 	public delegate void RecievePositionEvent(ArgsPosition[] args);
 	public static event RecievePositionEvent recievePositionEvent;
 
@@ -100,23 +102,24 @@ public class ServerPosition : MonoBehaviour {
 			string[] clearString = recvStr.Split (delimiterEnd);  // => 245,135,90
 			string[] substrings = clearString [0].Split (delimiter); // => 245  135  90
 
-			if (substrings.Length > 2) {
-				Debug.Log ("N:" + substrings [0] + " || (" + substrings [1] + " , " + substrings [2] + ")");
+			if (substrings.Length > 3) {
+				Debug.Log ("N:" + substrings [0] + " || (" + substrings [1] + " , " + substrings [2] + "," + substrings [3] + ")");
 
 				int DataNum = 0;
 				int.TryParse (substrings [0], out DataNum);
 
 				//Debug.Log (DataNum);
 
-				if (DataNum == 0 || substrings.Length < DataNum*2 + 1)
+				if (DataNum == 0 || substrings.Length < DataNum*3 + 1)
 					continue;
 
 				ArgsPosition[] myArgs = new ArgsPosition[DataNum];
 				for (int i = 0; i < DataNum; i++) {
 
 					myArgs [i] = new ArgsPosition ();
-					myArgs [i].x = System.Convert.ToInt32 (substrings [1 + i*2]);
-					myArgs [i].y = System.Convert.ToInt32 (substrings [2 + i*2]);
+					myArgs [i].x = System.Convert.ToInt32 (substrings [1 + i*3]);
+					myArgs [i].y = System.Convert.ToInt32 (substrings [2 + i*3]);
+					myArgs [i].z = System.Convert.ToInt32 (substrings [3 + i*3]);
 				}
 					
 				//Debug.Log ("Start Position Invoke");

@@ -29,6 +29,7 @@ public class MouseEmu : MonoBehaviour {
 
 	const int Depth_Width = 512;
 	const int Depth_Height = 424;
+	const int emu_Height = 160;
 
 	// Use this for initialization
 	IEnumerator Start () {
@@ -54,7 +55,7 @@ public class MouseEmu : MonoBehaviour {
 		if (emuPersonPos.Count != emuUserNumber) {
 			if (emuUserNumber > emuPersonPos.Count) {
 				for (int i = 0; i < emuUserNumber - emuPersonPos.Count; i++) {
-					emuPersonPos.Add (new ArgsPosition {x = Random.Range (0, 512), y = Random.Range (0, 424)});
+					emuPersonPos.Add (new ArgsPosition { x = Random.Range (0, 512), y = Random.Range (0, 424), z = emu_Height });
 				}
 			}
 			if (emuUserNumber < emuPersonPos.Count) {
@@ -78,19 +79,19 @@ public class MouseEmu : MonoBehaviour {
 				int screen_y = Mathf.FloorToInt((Input.mousePosition.y - emuScreenPositon_baseY) / EmuScreen_Height * Depth_Height);
 
 				int num = emuPersonPos.Count + 1;
-				string mes = "" + num + "," + screen_x + "," + screen_y;
+				string mes = "" + num + "," + screen_x + "," + screen_y + "," + emu_Height;
 
 				for (int i = 0; i < emuPersonPos.Count; i++) {
-					mes += "," + emuPersonPos [i].x + "," + emuPersonPos [i].y;
+					mes += "," + emuPersonPos [i].x + "," + emuPersonPos [i].y + "," + emu_Height;
 				}
 
 				WriteEmuPosition (mes);
 			}
 		}
 
-		if (Input.GetButtonDown ("Fire1")) {
-			Instantiate (baseBullet , userPoint , Quaternion.identity);
-		}
+//		if (Input.GetButtonDown ("Fire1")) {
+//			Instantiate (baseBullet , userPoint , Quaternion.identity);
+//		}
 
 	}
 

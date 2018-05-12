@@ -9,6 +9,10 @@ using System.Threading;
 
 public class ServerGlass: MonoBehaviour {
 
+	//負責發送Touch座標給眼鏡
+	//new:負責發送位置座標給眼鏡
+	//V21 , new:負責接收撞擊地面時的位置
+
 	public delegate void RecieveGlassEvent(ArgsPosition[] args);
 	public static event RecieveGlassEvent recieveGlassEvent;
 
@@ -92,39 +96,45 @@ public class ServerGlass: MonoBehaviour {
 			recvStr=Encoding.UTF8.GetString(recvData,0,recvLen);  
 
 			//N,n,n,n,n[/TCP]
-			Debug.Log(recvStr);
+			Debug.Log("Server Glass Rcv : " + recvStr);
 
 			//Recieve Data Will Be   245,135,90[/TCP]   , str 不會包含[/TCP]
 			char delimiter = ',';
-			char delimiterEnd = '[';
-			string[] clearString = recvStr.Split (delimiterEnd);  // => 245,135,90
-			string[] substrings = clearString [0].Split (delimiter); // => 245  135  90
+			string delimiterEnd = "[/TCP]";
 
-			if (substrings.Length > 2) {
-				Debug.Log ("N:" + substrings [0] + " _ " + substrings [1] + " , " + substrings [2]);
+			//when data send quickly , server will recieve at least 2 [/TCP] , so message will be => 245,135,90[/TCP]125,15,190[/TCP]245,135,90[/TCP]
+			//Split should remember that end is a part of substring , for above example , split number is 4  (3 + 1 end )
+			string[] fragmentString = recvStr.Split(new[] {delimiterEnd}, System.StringSplitOptions.None);
 
-				int DataNum = 0;
-				int.TryParse (substrings [0], out DataNum);
+			int fragmentNum = fragmentString.Length - 1;
 
-				Debug.Log (DataNum);
+			for(int fn = 0; fn < fragmentNum ; fn++)
+			{
+				string[] substrings = fragmentString [fn].Split (delimiter); // => 245  135  90
 
-				if (DataNum == 0 || substrings.Length < DataNum*2 + 1)
-					continue;
+				if (substrings.Length > 2) {
 
-				ArgsPosition[] myArgs = new ArgsPosition[DataNum];
-				for (int i = 0; i < DataNum; i++) {
+					int DataNum = 0;
+					int.TryParse (substrings [0], out DataNum);
 
-					myArgs [i] = new ArgsPosition ();
-					myArgs [i].x = System.Convert.ToInt32 (substrings [1 + i*2]);
-					myArgs [i].y = System.Convert.ToInt32 (substrings [2 + i*2]);
-				}
+					if (DataNum == 0 || substrings.Length < DataNum*2 + 1)
+						continue;
 
-				Debug.Log ("Start Position Invoke");
-				if (recieveGlassEvent != null) {
-					recieveGlassEvent.Invoke (myArgs);
-				}
+					ArgsPosition[] myArgs = new ArgsPosition[DataNum];
+					for (int i = 0; i < DataNum; i++) {
 
-			} // end Length
+						myArgs [i] = new ArgsPosition ();
+						myArgs [i].x = System.Convert.ToInt32 (substrings [1 + i*2]);
+						myArgs [i].y = System.Convert.ToInt32 (substrings [2 + i*2]);
+					}
+
+					if (recieveGlassEvent != null) {
+						recieveGlassEvent.Invoke (myArgs);
+					}
+
+				} // end Length
+
+			} // end fragment
 
 		}  // end While
 	}
