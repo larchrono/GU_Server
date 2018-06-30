@@ -7,6 +7,8 @@ public class UserData : MonoBehaviour {
 	public int depthX = 0;
 	public int depthY = 0;
 
+	public int score = 0;
+
 	public Vector2 Position(){
 		return new Vector2 (depthX, depthY);
 	}

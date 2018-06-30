@@ -9,7 +9,9 @@ public class LogicSystem : MonoBehaviour {
 	public GameObject iconBase;
 	public GameObject userBase;
 	public List<GameObject> usersSet = new List<GameObject>();
+	public float textShift = -90;
 
+	public Camera cameraWalk;
 	public Light LightSpot;
 
 	public static int touchScreenWidth = 1920;
@@ -71,7 +73,15 @@ public class LogicSystem : MonoBehaviour {
 
 		for (int i = 0; i < usersSet.Count; i++) {
 			UserData loc = usersSet [i].GetComponent<UserData> ();
-			SmoothMove(usersSet[i], new Vector3(DepthToSceneX(loc.depthX) , userHeight , DepthToSceneZ(loc.depthY)));
+			Vector3 targetPos = new Vector3 (DepthToSceneX (loc.depthX), userHeight, DepthToSceneZ (loc.depthY));
+
+			SmoothMove(usersSet[i], targetPos);
+
+			var textScore = usersSet [i].GetComponent<UserChildMethod> ().textScore;
+			var vPos = cameraWalk.WorldToScreenPoint (targetPos) + new Vector3 (0, textShift, 0);
+
+			SmoothMove(textScore.gameObject, vPos);
+			//textScore.transform.position = vPos + new Vector3 (0, -90, 0);
 		}
 
 		LightSpot.transform.position = View_MapCenter = new Vector3 (GetUsersCenter ().x, SpotLightheight, GetUsersCenter ().z);
@@ -140,6 +150,7 @@ public class LogicSystem : MonoBehaviour {
 			}
 			if(numToCreate < 0){
 				for(int i = usersSet.Count; i > args.Length ; i--){
+					Destroy(usersSet[i - 1].GetComponent<UserChildMethod>().textScore);
 					Destroy(usersSet[i - 1]);
 					usersSet.RemoveAt(i - 1);
 				}
@@ -228,6 +239,10 @@ public class LogicSystem : MonoBehaviour {
 	public void SendResolutionToGlass(){
 		string message = "rs," + touchScreenWidth + "," + touchScreenHeight;
 		ServerGlass.current.SocketSend (message);
+	}
+
+	public void TextShiftChange(string src){
+		float.TryParse (src, out textShift);
 	}
 
 	public void QuitGame(){

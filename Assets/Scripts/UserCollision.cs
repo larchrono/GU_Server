@@ -20,6 +20,10 @@ public class UserCollision : MonoBehaviour {
 				temp.textureSheetAnimation.SetSprite (0, RandomSprites [Random.Range (0, RandomSprites.Length)]);
 			Destroy (temp.gameObject,8);
 			Destroy (c.gameObject);
+
+			//2018.06.29 Score++
+			var score = GetComponent<UserData>().score++;
+			GetComponent<UserChildMethod> ().textScore.text = "" + score;
 		}
 	}
 	

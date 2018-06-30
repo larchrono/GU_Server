@@ -228,6 +228,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   depthX: 0
   depthY: 0
+  score: 0
 --- !u!114 &114733398393301572
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -285,6 +286,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Circle: {fileID: 198551301436461432}
   Glow: {fileID: 198544582809203266}
+  textScorePrefab: {fileID: 114752038099542924, guid: a293b69346e3be941ad17628d23b1c43,
+    type: 2}
 --- !u!114 &114947157917502084
 MonoBehaviour:
   m_ObjectHideFlags: 1

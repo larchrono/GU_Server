@@ -7,7 +7,8 @@ public class DisplayScript : MonoBehaviour
 	public static DisplayScript current;
 	public Camera cameraWalk;
 	public Camera cameraTouch;
-	public Canvas canvasMain;
+	public Canvas canvasTouch;
+	public Canvas canvasWalk;
 
 	public delegate void DisplayChange(int touchCameraId);
 	public event DisplayChange displayChangeEvent;
@@ -34,7 +35,8 @@ public class DisplayScript : MonoBehaviour
 			var temp = cameraWalk.targetDisplay;
 			cameraWalk.targetDisplay = cameraTouch.targetDisplay;
 			cameraTouch.targetDisplay = temp;
-			canvasMain.targetDisplay = cameraTouch.targetDisplay;
+			canvasTouch.targetDisplay = cameraTouch.targetDisplay;
+			canvasWalk.targetDisplay = cameraWalk.targetDisplay;
 
 			if (displayChangeEvent != null)
 				displayChangeEvent (cameraTouch.targetDisplay);
